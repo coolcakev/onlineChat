@@ -1,0 +1,42 @@
+﻿@using onlineChat.Helpers;
+@using onlineChat.Entity;
+@model onlineChat.Entity.Message
+@{
+    var user = SessionHelper.GetItemFromSession<User>("UserName", Context.Session);
+    var style = "display:flex;justify-content:center;clear:both;float:";
+    if (user.Id != Model.User.Id)
+    {
+        style += "left";
+    }
+    else
+    {
+        style += "right";
+    }
+}
+<div id="@Model.Id" style="@style">
+    <div>
+        <h5>Author : @Model.User.Name</h5>
+        <p>
+            @Model.Content
+        </p>
+    </div>
+    <div class="btn-group show">
+        <div data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="display: flex;align-items: center;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-three-dots-vertical" viewBox="0 0 16 16" style="cursor: pointer; margin-left: 15px;">
+                <path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"></path>
+            </svg>
+        </div>
+        <div class="dropdown-menu" x-placement="top-start" style="position: absolute; will-change: transform; top: 0px; left: 40px; transform: translate3d(0px, -116px, 0px);">
+            @if (user.Id != Model.User.Id && Model.Chat.TypeChat != TypeChat.Chat)
+            {
+                <a style="text-decoration:none" class="dropdown-item" href="#" onclick="sendMessageToFriend({userName:'@Model.User.Name',userConnectionId:'@Model.User.ConnectionId'})">Send Message to @Model.User.Name</a>
+            }
+            @if (user.Id == Model.User.Id)
+            {
+                <a style="text-decoration: none" class="dropdown-item" onclick="UpdateMessageOpen({id:'@Model.Id',content:'@Model.Content'})">Edit message</a>
+                <a style="text-decoration: none" class="dropdown-item" href="#">Delete Message</a>
+            }
+        </div>
+    </div>
+</div>
+

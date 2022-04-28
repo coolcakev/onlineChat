@@ -1,0 +1,18 @@
+﻿@using onlineChat.Entity;
+@model onlineChat.Models.HomeModels.ChatsPartialHomeModel
+<div id="@Model.GroupChatId" chatGroup>
+    @foreach (var chat in Model.Chats)
+    {
+        <div id="@chat.Id">
+            <a href="#" onclick="clickOnChat(this)">
+        
+                @chat.Title
+
+                
+            </a>
+        </div>
+    }
+</div>
+
+
+

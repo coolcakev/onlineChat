@@ -1,0 +1,161 @@
+﻿@using onlineChat.Models.HomeModels;
+@model onlineChat.Models.HomeModels.IndexHomeModel
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <button class="myBtn" data-toggle="modal" data-target="#dialogCreate" id="CreateChatButton" >Create</button>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-4" style="border-right: 1px solid red;">
+                <div>
+                    <ul class="nav nav-tabs justify-content-center">
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" role="tab" aria-controls="AllChats"
+                               href="#AllChats">AllChat</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" role="tab" aria-controls="MyChats"
+                               href="#MyChats">MyChats</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" role="tab" aria-controls="Friends"
+                               href="#Friends">Friends</a>
+                        </li>
+
+                    </ul>
+                </div>
+
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade active" id="AllChats" role="tabpanel" aria-labelledby="home-tab">
+                        @Html.Partial("_Chats", new ChatsPartialHomeModel()
+                        {
+
+                   Chats = Model.Chats,
+                   GroupChatId = "AllChat"
+
+                   })
+                    </div>
+                    <div class="tab-pane fade" id="MyChats" role="tabpanel" aria-labelledby="profile-tab">
+                        @Html.Partial("_Chats", new ChatsPartialHomeModel()
+                        {
+
+                   Chats = Model.MyChats,
+                   GroupChatId = "MyChats"
+
+                   })
+                    </div>
+                    <div class="tab-pane fade" id="Friends" role="tabpanel" aria-labelledby="contact-tab">
+                        @Html.Partial("_Chats", new ChatsPartialHomeModel()
+                        {
+
+                   Chats = Model.Friends,
+                   GroupChatId = "Friends"
+
+                   })
+                    </div>
+                </div>
+            </div>
+            <div id="PlaceForMessage" class="col">
+                2 of 2
+            </div>
+        </div>
+    </div>
+</div>
+@*Create*@
+<div class="modal fade" tabindex="-1" id="dialogCreate" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="card card-waves">
+                <div class="card-header">
+                    Create announcement
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="datatable">
+                        <div class="row">
+                            <div id="CreateAnnouncement" class="col-lg-12">
+                                <div class="form-group">
+                                    <label for="registerLogin">Title</label>
+                                    <input class="form-control" id="ChatTitle" placeholder="Title" style=" display: block; width: 100%;" type="text" oninput="clearValid(this)" />
+                                    <div class="invalid-feedback" style="display:block">
+                                    </div>
+                                </div>                 
+
+                                <div style="display: flex; flex-direction: row-reverse;">
+                                    <button type="button" class="myBtn" onclick="createChat()">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>  
+    function showChatFromHub(chat,placeChatId) {
+        let placeForChat = document.getElementById(placeChatId);
+        let chatElement = createChatElement(chat)
+        placeForChat.appendChild(chatElement);
+    }
+    function createChatApiSuccess(data, placeForChatId) {
+        let placeForMyChat ="MyChats"
+        showChatFromHub(data, placeForMyChat)
+        ChatHub.invokeFunctionEvenSendChat(data, placeForChatId)
+        joinChat(data)
+    }
+    function createChat() {
+        let chatTitle = document.getElementById("ChatTitle")
+        if (chatTitle.value == "") {
+            setValidationInElement(chatTitle, "is-invalid", "Title is empty");
+            return
+        }
+        let placeForChatSelector = "AllChat";
+        ApiMessage.CreateChat(chatTitle.value, typeChat.Group, (data) => createChatApiSuccess(data, placeForChatSelector))
+        $('#dialogCreate').modal('hide')
+    }
+    NodeList.prototype.addEventListener = function (event_name, callback, useCapture) {
+        for (let i = 0; i < this.length; i++) {
+            this[i].addEventListener(event_name, callback, useCapture);
+        }
+    };
+    function clickOnChat(element) {
+        let parentDiv = element.closest("div")
+        let chatId = parentDiv.id;
+
+        ApiMessage.GetMessege(chatId)
+    }
+    function connectUserToHub(connectionId) {
+        var model = {
+            ConnectionId: connectionId
+        }
+        $.ajax({
+            type: "POST",
+            url: `/Account/UpdateUserConnectionId`,
+            data: JSON.stringify(model),
+            contentType: "application/json; charset=utf-8"
+        });
+    }
+
+    function makeAllConnectionToGroup(elementParent) {
+        NodeList.prototype.map = Array.prototype.map;
+        let groups = elementParent.map(group => group.closest("div").id)
+        ChatHub.invokeFunctionJoinManyGroup(groups)
+    }
+    document.addEventListener("DOMContentLoaded",async () => {
+
+        let route = "/chat";
+       await ChatHub.makeConnection(route)  
+        ChatHub.setFunctionEventGetConnetctedId( connectionId => connectUserToHub(connectionId))
+        ChatHub.setFunctionEvenSendMessage( (message, user) => showMessageFromHub(message, user))
+        ChatHub.setFunctionEvenSendChat((chat, placeChatId) => showChatFromHub(chat, placeChatId))
+        let allChatsElement = document.querySelectorAll("#AllChat a,#Friends a");
+        makeAllConnectionToGroup(allChatsElement)
+    })
+
+</script>

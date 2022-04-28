@@ -1,0 +1,34 @@
+﻿@using onlineChat.Entity;
+@model onlineChat.Models.ChatsModels.ResponceGetMessagesChatModel
+
+<h2>@Model.Chat.Title</h2>
+<div id="@Model.Chat.Id" >
+    <input id="ChatIdValue" value="@Model.Chat.Id" hidden/>
+    @if (Model.IsJoinedToChat)
+    {
+
+        <div class="form-group">
+            <input class="form-control" onclick="clearValid(this)" type="text" id="UserMessage" />
+            <div class="invalid-feedback" style="display:block">
+            </div>
+        </div>
+        <button id="SendMessageButton" style="float:right" onclick="sendMessage({ChatId:'@Model.Chat.Id'})">Send</button>    
+
+
+    }
+    else
+    {
+        <button id="JoinChatButton" onclick="joinChatButton({id:'@Model.Chat.Id',title:'@Model.Chat.Title'})">Join</button>
+
+    }
+    <div id="AllMassage">      
+        @foreach (var message in Model.Messages)
+        {
+            @Html.Partial("_Message", message)
+        }
+    </div>
+
+</div>
+
+
+

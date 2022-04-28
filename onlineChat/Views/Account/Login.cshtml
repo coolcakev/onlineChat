@@ -1,0 +1,35 @@
+﻿
+@{
+    ViewData["Title"] = "Login";
+}
+<div class="form-group">
+    <label>Enter your name</label>
+    <input class="form-control" onclick="clearValid(this)" type="text" id="UserName" />
+    <div class="invalid-feedback" style="display:block">
+    </div>
+</div>
+<button id="LoginButton" onclick="login()">Enter</button>
+<script>
+    function login() {
+        var userName = document.getElementById("UserName");
+
+        if (userName.value == "") {
+            setValidationInElement(userName, "is-invalid", "Username is empty");
+            return
+        }
+        var model = {
+            UserName: userName.value
+        }
+        $.ajax({
+            type: "Post",
+            url: `/Account/Login`,
+            data: JSON.stringify(model),
+            contentType: "application/json; charset=utf-8",
+            success: function () {
+                window.location.href = "/"
+            }
+        });
+    }
+
+</script>
+
