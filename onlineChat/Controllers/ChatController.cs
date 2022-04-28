@@ -55,15 +55,6 @@ namespace onlineChat.Controllers
 
             return Ok(chat);
         }
-        [HttpPost]
-        public async Task<IActionResult> Update([FromBody] UpdateChatModel model)
-        {
-            if (string.IsNullOrWhiteSpace(model.Title))
-                return NotFound();
-
-            var chat = await _chatService.Create(model);
-
-            return Ok(chat);
-        }
+       
     }
 }
